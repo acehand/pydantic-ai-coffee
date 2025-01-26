@@ -1,0 +1,8 @@
+pyproject.toml
+src/pydantic_coffee/__init__.py
+src/pydantic_coffee/main.py
+src/pydantic_coffee.egg-info/PKG-INFO
+src/pydantic_coffee.egg-info/SOURCES.txt
+src/pydantic_coffee.egg-info/dependency_links.txt
+src/pydantic_coffee.egg-info/requires.txt
+src/pydantic_coffee.egg-info/top_level.txt
