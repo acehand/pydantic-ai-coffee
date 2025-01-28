@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any
 from pydantic_coffee.models.coffee import CoffeeOrder, CoffeeType, MilkType, Orders
 from pydantic_coffee.services.order_service import OrderService
+from pydantic_coffee.agents.order_count_agent import OrderCountAgent
 from pydantic_coffee.agents.order_pattern_agent import OrderPatternAgent
 from pydantic_coffee.agents.intent_agent import IntentAgent, PossibleIntents
 from pydantic_ai.models.vertexai import VertexAIModel
@@ -44,7 +45,7 @@ async def create_order(order: CoffeeOrder):
     order_service.add_order(order)
     return order
 
-@app.get("/orders/", response_model=Orders)
+@app.get("/orders/", response_model=Dict[str, Any])
 async def get_orders():
     """Get all coffee orders"""
     logfire.info("Fetching all orders")
@@ -54,27 +55,20 @@ async def get_orders():
     orders = Orders.from_dataframe(df)
     model = VertexAIModel('gemini-1.5-flash-002')
     intent = IntentAgent(model)
-    intent_response = await intent.getIntent("how many lattes on Monday?")
+    intent_response = await intent.getIntent("Give me coffee pattern?")
     logfire.info(f"Intent;{intent}", intent=intent_response.data.intent)
-    
+    response = None
     match intent_response.data.intent:
         case PossibleIntents.COUNT:
             print("Count")
+            agent = OrderCountAgent(model)
+            response = await agent.analyze(orders)
+        case PossibleIntents.PATTERN:
             agent = OrderPatternAgent(model)
             response = await agent.analyze(orders)
-    #     case "ORDER_PATTERN":
-    #         agent = OrderPatternAgent(model)
-    #         response = await agent.analyze_pattern(orders)
-    #     case "ORDER_SUMMARY":
-    #         agent = OrderPatternAgent(model)
-    #         response = await agent.analyze_summary(orders)
-    #     case _:
-    #         response = await agent.analyze(orders)
-    
-    # agent = OrderPatternAgent(model)
-    # response = await agent.analyze(orders)
-    # print(response.data.model_dump_json())
-    return orders
+            print(response.data.model_dump_json())
+    print(response.data.pattern)
+    return {"pattern": response.data.pattern}
 
 @app.get("/orders/{order_id}", response_model=Dict[str, Any])
 async def get_order(order_id: str):
