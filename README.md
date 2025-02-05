@@ -13,7 +13,7 @@ A FastAPI-based coffee shop order management system with Pydantic validation, pa
 
 ## Installation
 
-```bash
+```
 # Clone the repository
 git clone <repository-url>
 cd pydantic_coffee
@@ -28,7 +28,6 @@ uv pip install -e ".[dev]"
 
 ### Usage
 
-```bash
 # Run the FastAPI server
     uvicorn pydantic_coffee.main:app --reload
 ```
